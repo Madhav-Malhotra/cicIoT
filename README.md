@@ -7,7 +7,8 @@ Leading a [team of 15 at the University of Waterloo](https://wataicyber.substack
 ![We've republished the dataset on Kaggle to make it easier to use](preview.png)
 
 ### Notebook descriptions
-1. `downsampling.ipynb` - This notebook samples 5% of the rows from each cyberattack class from the dataset. This reduces the dataset size from 14GB to 600 MB, making it easier to perform feature visualisation and feature selection.
+1. `downsampling.ipynb` - This notebook samples 0.1, 0.5, 1, 5, and 10% of the rows from each cyberattack class from the dataset. This reduces the dataset size from 14GB to 12-600 MB, making it easier to perform feature visualisation and feature selection. [Kaggle live](https://www.kaggle.com/code/madhavmalhotra/creating-a-smaller-dataset-for-ciciot2023)
+2. 
 
 ### Useful Links
 1. [CIC-IoT-2023 Dataset on Kaggle](https://www.kaggle.com/datasets/madhavmalhotra/unb-cic-iot-dataset)

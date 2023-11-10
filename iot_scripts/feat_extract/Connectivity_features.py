@@ -1,4 +1,4 @@
-from Supporting_functions import ip_to_str
+from feat_extract.Supporting_functions import ip_to_str
 
 
 class Connectivity_features_basic:

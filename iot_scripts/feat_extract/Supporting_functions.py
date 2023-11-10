@@ -1,7 +1,7 @@
-import socket # safe
-import struct # safe
-from functools import reduce # installable
-import numpy as np # unsafe - must be replaced with ulab
+import socket 
+import struct 
+from functools import reduce 
+import numpy as np 
 
 def ip_to_str(ip):
     """

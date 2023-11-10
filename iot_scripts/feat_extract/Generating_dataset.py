@@ -1,4 +1,4 @@
-from Feature_extraction import Feature_extraction
+from feat_extract.Feature_extraction import Feature_extraction
 import time
 import warnings
 warnings.filterwarnings('ignore')
@@ -17,9 +17,9 @@ if __name__ == '__main__':
     
 ]
     subfiles_size = 10 # MB
-    split_directory = 'split_temp/'
-    destination_directory = 'output/'
-    converted_csv_files_directory = 'csv_files/'
+    split_directory = './split_temp/'
+    destination_directory = './output/'
+    converted_csv_files_directory = './csv_files/'
     n_threads = 8
     
     address = "./"
@@ -77,6 +77,3 @@ if __name__ == '__main__':
         
     end = time.time()
     print(f'Elapsed Time = {(end-start)}s')
-    
-    
-    

@@ -1,62 +1,60 @@
-import dpkt
-import pandas as pd
-import json
-from scapy.all import *
-from Communication_features import Communication_wifi, Communication_zigbee
-from Connectivity_features import Connectivity_features_basic, Connectivity_features_time, \
-    Connectivity_features_flags_bytes
-from Dynamic_features import Dynamic_features
-from Layered_features import L3, L4, L2, L1
-from Supporting_functions import get_protocol_name, get_flow_info, get_flag_values, compare_flow_flags, \
-    get_src_dst_packets, calculate_incoming_connections, \
-    calculate_packets_counts_per_ips_proto, calculate_packets_count_per_ports_proto
-    
-from tqdm import tqdm
+'''
+========== LOAD LIBRARIES ==========
+'''
+
 import time
+import dpkt
+import json
+import pandas as pd
+from tqdm import tqdm
+from scapy.all import *
 
+from feat_extract.Layered_features import L3, L4, L2, L1
+from feat_extract.Dynamic_features import Dynamic_features
+from feat_extract.Communication_features import Communication_wifi, Communication_zigbee
+from feat_extract.Connectivity_features import Connectivity_features_basic, Connectivity_features_time, Connectivity_features_flags_bytes
+from feat_extract.Supporting_functions import get_protocol_name, get_flow_info, get_flag_values, compare_flow_flags, get_src_dst_packets, calculate_incoming_connections, calculate_packets_counts_per_ips_proto, calculate_packets_count_per_ports_proto
+    
 class Feature_extraction():
-    columns = ["ts","flow_duration","Header_Length",
-              "Source IP","Destination IP","Source Port","Destination Port","Protocol Type","Protocol_name",
-              "Duration","src_ip_bytes","dst_ip_bytes","src_pkts","dst_pkts", "Rate", "Srate", "Drate"
-               ,"TNP_per_proto_tcp","TNP_per_proto_udp","fin_flag_number","syn_flag_number","rst_flag_number"
-               ,"psh_flag_number","ack_flag_number","urg_flag_number","ece_flag_number","cwr_flag_number",
-               "ack_count", "syn_count", "fin_count", "urg_count", "rst_count", 
-              
-               "max_duration","min_duration","sum_duration","average_duration","std_duration",
-               "MQTT", "CoAP", "HTTP", "HTTPS", "DNS", "Telnet","SMTP", "SSH", "IRC", "TCP", "UDP", "DHCP","ARP", "ICMP", "IGMP", "IPv", "LLC",
-    "Tot sum", "Min", "Max", "AVG", "Std","Tot size", "IAT", "Number", "MAC", "Magnitue", "Radius", "Covariance", "Variance", "Weight",
-               "Wifi_Type", "Wifi_Subtype", "DS status", "Fragments", "wifi_src", "wifi_dst", "Sequence number", "Protocol Version",
-               "flow_idle_time", "flow_active_time"
-
-    ]
+    columns = [
+        "ts","flow_duration","Header_Length","Source IP","Destination IP",
+        "Source Port","Destination Port","Protocol Type","Protocol_name",
+        "Duration","src_ip_bytes","dst_ip_bytes","src_pkts","dst_pkts",
+        "Rate", "Srate", "Drate","TNP_per_proto_tcp","TNP_per_proto_udp",
+        "fin_flag_number","syn_flag_number","rst_flag_number",
+        "psh_flag_number","ack_flag_number","urg_flag_number",
+        "ece_flag_number","cwr_flag_number","ack_count","syn_count",
+        "fin_count","urg_count","rst_count","max_duration","min_duration",
+        "sum_duration","average_duration","std_duration","MQTT","CoAP",
+        "HTTP","HTTPS","DNS","Telnet","SMTP","SSH","IRC","TCP","UDP",
+        "DHCP","ARP", "ICMP", "IGMP", "IPv", "LLC","Tot sum","Min","Max",
+        "AVG","Std","Tot size","IAT","Number","MAC","magnitude","Radius",
+        "Covariance","Variance","Weight","Wifi_Type","Wifi_Subtype",
+        "DS status","Fragments","wifi_src","wifi_dst","Sequence number",
+        "Protocol Version","flow_idle_time","flow_active_time"
+    ]    
     
-    
-    def pcap_evaluation(self,pcap_file,csv_file_name):
-        global ethsize, src_ports, dst_ports, src_ips, dst_ips, ips , tcpflows, udpflows, src_packet_count, dst_packet_count, src_ip_byte, dst_ip_byte
-        global protcols_count, tcp_flow_flgs, incoming_packets_src, incoming_packets_dst, packets_per_protocol, average_per_proto_src
-        global average_per_proto_dst, average_per_proto_src_port, average_per_proto_dst_port
-        columns = ["ts","flow_duration","Header_Length",
-                 
-                  "Protocol Type","Protocol_name",
-                  "Duration",
-                 
-                  "Rate", "Srate", "Drate"
-                   ,"fin_flag_number","syn_flag_number","rst_flag_number"
-                   ,"psh_flag_number","ack_flag_number","urg_flag_number","ece_flag_number","cwr_flag_number",
-                   "ack_count", "syn_count", "fin_count", "urg_count", "rst_count", 
-                 
-                   "max_duration","min_duration","sum_duration","average_duration","std_duration",
-                 
-                   "CoAP", "HTTP", "HTTPS", "DNS", "Telnet","SMTP", "SSH", "IRC", "TCP", "UDP", "DHCP","ARP", "ICMP", "IGMP", "IPv", "LLC",
-        "Tot sum", "Min", "Max", "AVG", "Std","Tot size", "IAT", "Number", "MAC", "Magnitue", "Radius", "Covariance", "Variance", "Weight",
-                 
-                   "DS status", "Fragments", 
-                 
-                   "Sequence number", "Protocol Version",
-                   "flow_idle_time", "flow_active_time"
-
+    def pcap_evaluation(self, pcap_file, csv_file_name):
+        global ethsize,src_ports,dst_ports,src_ips,dst_ips,ips,tcpflows,udpflows,src_packet_count,dst_packet_count,src_ip_byte,dst_ip_byte,protocols_counts,tcp_flow_flgs,incoming_packets_src,incoming_packets_dst,packets_per_protocol,average_per_proto_src,average_per_proto_dst,average_per_proto_src_port,average_per_proto_dst_port
+        columns = [
+            "ts","flow_duration","Header_Length","Source IP","Destination IP",
+            "Source Port","Destination Port","Protocol Type","Protocol_name",
+            "Duration","src_ip_bytes","dst_ip_bytes","src_pkts","dst_pkts",
+            "Rate", "Srate", "Drate","TNP_per_proto_tcp","TNP_per_proto_udp",
+            "fin_flag_number","syn_flag_number","rst_flag_number",
+            "psh_flag_number","ack_flag_number","urg_flag_number",
+            "ece_flag_number","cwr_flag_number","ack_count","syn_count",
+            "fin_count","urg_count","rst_count","max_duration","min_duration",
+            "sum_duration","average_duration","std_duration","MQTT","CoAP",
+            "HTTP","HTTPS","DNS","Telnet","SMTP","SSH","IRC","TCP","UDP",
+            "DHCP","ARP", "ICMP", "IGMP", "IPv", "LLC","Tot sum","Min","Max",
+            "AVG","Std","Tot size","IAT","Number","MAC","magnitude","Radius",
+            "Covariance","Variance","Weight","Wifi_Type","Wifi_Subtype",
+            "DS status","Fragments","wifi_src","wifi_dst","Sequence number",
+            "Protocol Version","flow_idle_time","flow_active_time"
         ]
-        base_row = {c:[] for c in columns}
+        
+        base_row = {c: [] for c in columns}
         start = time.time()
         ethsize = []
         src_ports = {}  # saving the number of source port used
@@ -171,7 +169,7 @@ class Feature_extraction():
 
                     #Dynamic_packets
                     dy = Dynamic_features()
-                    # number = dy.dynamic_count(protcols_count)  # need to ask information about it
+                    # number = dy.dynamic_count(protocols_counts)  # need to ask information about it
 
 
                     # Connectivity_basic_features
@@ -222,10 +220,10 @@ class Feature_extraction():
                     # else:
                     #     packets_per_protocol[protocol_name] = 1
 
-                    # if protocol_name in protcols_count.keys():
-                    #     protcols_count[protocol_name] = protcols_count[protocol_name] + 1
+                    # if protocol_name in protocols_counts.keys():
+                    #     protocols_counts[protocol_name] = protocols_counts[protocol_name] + 1
                     # else:
-                    #     protcols_count[protocol_name] = 1
+                    #     protocols_counts[protocol_name] = 1
 
 
 
@@ -434,7 +432,7 @@ class Feature_extraction():
                            "IAT": IAT, 
                            "Number": len(ethsize), 
                            "MAC": mac,
-                           "Magnitue": magnite, 
+                           "magnitude": magnite, 
                            "Radius":radius, 
                            "Covariance":covaraince, 
                            "Variance":var_ratio, 
@@ -466,5 +464,3 @@ class Feature_extraction():
         processed_df = pd.concat(df_summary_list).reset_index(drop=True)
         processed_df.to_csv(csv_file_name+".csv", index=False)
         return True
-
-

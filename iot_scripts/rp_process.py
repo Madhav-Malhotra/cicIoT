@@ -4,7 +4,7 @@ from feat_extract.Feature_extraction import Feature_extraction
 
 def analyze_pcap_file(file_path):
     print(f"Analyzing {file_path}")
-    fe.pcap_evaluation(file_path, file_path[:-5] + ".csv")
+    fe.pcap_evaluation(file_path, file_path[:-5])
     
 
 def monitor_directory(directory):

@@ -1,6 +1,6 @@
 # Exploring the CIC-IoT-2023 Dataset
 
-The Canadian Insitute of Cybersecurity at the University of New Brunswick published the open source [CIC-IoT-2023 dataset](https://www.kaggle.com/datasets/madhavmalhotra/unb-cic-iot-dataset). This dataset promotes **research on how to detect 7 kinds of cyberattacks across 100 IoT devices**.
+The University of New Brunswick's Canadian Insitute of Cybersecurity published the open source [CIC-IoT-2023 dataset](https://www.kaggle.com/datasets/madhavmalhotra/unb-cic-iot-dataset). This dataset promotes **research on how to detect 7 kinds of cyberattacks across 100 IoT devices**.
 
 Leading a [team of 15 at the University of Waterloo](https://wataicyber.substack.com/), this repository contains useful notebooks for sampling, preprocessing, visualising, and training models on the CIC-IoT-2023 dataset.
 

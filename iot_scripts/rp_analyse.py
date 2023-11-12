@@ -5,7 +5,7 @@ import pandas as pd
 cols = ["duration", "srate", "drate", "syn_flag_number", "psh_flag_number", 
         "ack_flag_number", "ack_count", "syn_count", "rst_count", "header_length", 
         "https", "ssh", "flow_duration", "avg", "max", "tot_sum", "min", "iat", 
-        "magnitude", "radius", "variance"]
+        "magnitue", "radius", "variance"]
 
 
 mean = np.array([1.14469135e+02, 1.94699208e+03, 0.00000000e+00, 0.00000000e+00,
@@ -79,7 +79,7 @@ detectors = np.array([[ 5.09233102e-02, -7.08748698e-02,  0.00000000e+00,
         -7.60168254e-01, -3.30105513e-01, -8.12760592e-01,
         -9.68212068e-01, -7.94027746e-01, -2.68789029e+00]])
 
-max_dist = 10.0
+max_dist = 500.0
 
 def check_benign(csv_file : str) -> np.array:
     '''
@@ -87,10 +87,14 @@ def check_benign(csv_file : str) -> np.array:
     record, False otherwise.
     '''
 
-    # Load CSV into Pandas dataframe
+    # Select CSV columns specified above
     df = pd.read_csv(csv_file)
-    df = df[cols]
-    print(df.head())
+    df.columns = ['_'.join(c.lower().split(' ')) for c in df.columns]
+    X = np.expand_dims(df[cols].to_numpy(), axis=1)
+  
+    # Normalise data
+    X = (X - mean) / std
 
-    return None
-
+    # Calculate average distance from each detector
+    dist = np.mean( np.sum((X-detectors)**2, axis=-1), axis=-1 )
+    return dist < max_dist

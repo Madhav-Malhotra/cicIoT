@@ -5,13 +5,15 @@ from feat_extract.Feature_extraction import Feature_extraction
 from rp_analyse import check_benign
 
 # Setup output pins
-GPIO.setmode(GPIO.BCM)
-ben_pin = 22
-mal_pin = 23
-mon_pin = 24
-GPIO.setup(ben_pin, GPIO.OUT)
-GPIO.setup(mal_pin, GPIO.OUT)
-GPIO.setup(mon_pin, GPIO.OUT)
+BEN_PIN = 22
+MAL_PIN = 23
+MON_PIN = 24
+WAIT = 1.0
+
+GPIO.setmode(GPIO.BOARD)
+GPIO.setup(BEN_PIN, GPIO.OUT)
+GPIO.setup(MAL_PIN, GPIO.OUT)
+GPIO.setup(MON_PIN, GPIO.OUT)
 
 
 def analyze_pcap_file(file_path):
@@ -26,9 +28,10 @@ def analyze_pcap_file(file_path):
     # Run negative selection, show results
     benign = check_benign(file_path[:-5] + ".csv")
     for b in list(benign):
-        GPIO.output(ben_pin if b else mal_pin, GPIO.HIGH)
-        time.sleep(0.1)
-        GPIO.output(ben_pin if b else mal_pin, GPIO.LOW)
+        GPIO.output(BEN_PIN if b else MAL_PIN, GPIO.HIGH)
+        time.sleep(WAIT)
+        GPIO.output(BEN_PIN if b else MAL_PIN, GPIO.LOW)
+        time.sleep(WAIT)
 
 def monitor_directory(directory):
     '''
@@ -36,8 +39,8 @@ def monitor_directory(directory):
     '''
 
     while True:
-
-        GPIO.output(mon_pin, GPIO.LOW)
+        GPIO.output(MON_PIN, GPIO.LOW)
+        
         # Check for new files
         for filename in os.listdir(directory):
             if filename.endswith(".pcap"):
@@ -47,7 +50,7 @@ def monitor_directory(directory):
                     analyze_pcap_file(file_path)
                     processed_files.add(file_path)
 
-        GPIO.output(mon_pin, GPIO.HIGH)
+        GPIO.output(MON_PIN, GPIO.HIGH)
         time.sleep(10)
 
 if __name__ == "__main__":
@@ -60,5 +63,11 @@ if __name__ == "__main__":
     print("Starting packet processing")
     try:
         monitor_directory(directory_to_monitor)
+
+    # Fail gracefully
     except KeyboardInterrupt:
         print("Stopping packet processing")
+        GPIO.output(BEN_PIN, GPIO.LOW)
+        GPIO.output(MAL_PIN, GPIO.LOW)
+        GPIO.output(MON_PIN, GPIO.LOW)
+        GPIO.cleanup()

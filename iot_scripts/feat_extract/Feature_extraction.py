@@ -15,19 +15,17 @@ from tqdm import tqdm
 import time
 
 class Feature_extraction():
-    columns = ["ts","flow_duration","Header_Length",
-              "Source IP","Destination IP","Source Port","Destination Port","Protocol Type","Protocol_name",
-              "Duration","src_ip_bytes","dst_ip_bytes","src_pkts","dst_pkts", "Rate", "Srate", "Drate"
-               ,"TNP_per_proto_tcp","TNP_per_proto_udp","fin_flag_number","syn_flag_number","rst_flag_number"
-               ,"psh_flag_number","ack_flag_number","urg_flag_number","ece_flag_number","cwr_flag_number",
-               "ack_count", "syn_count", "fin_count", "urg_count", "rst_count", 
-              
-               "max_duration","min_duration","sum_duration","average_duration","std_duration",
-               "MQTT", "CoAP", "HTTP", "HTTPS", "DNS", "Telnet","SMTP", "SSH", "IRC", "TCP", "UDP", "DHCP","ARP", "ICMP", "IGMP", "IPv", "LLC",
-    "Tot sum", "Min", "Max", "AVG", "Std","Tot size", "IAT", "Number", "MAC", "Magnitue", "Radius", "Covariance", "Variance", "Weight",
-               "Wifi_Type", "Wifi_Subtype", "DS status", "Fragments", "wifi_src", "wifi_dst", "Sequence number", "Protocol Version",
-               "flow_idle_time", "flow_active_time"
-
+    columns = [
+        "ts","flow_duration","header_length","source_ip","destination_ip","source_port","destination_port",
+        "protocol_type","protocol_name","duration","src_ip_bytes","dst_ip_bytes","src_pkts","dst_pkts",
+        "rate", "srate", "drate","tnp_per_proto_tcp","tnp_per_proto_udp","fin_flag_number","syn_flag_number",
+        "rst_flag_number","psh_flag_number","ack_flag_number","urg_flag_number","ece_flag_number",
+        "cwr_flag_number","ack_count","syn_count","fin_count","urg_count","rst_count","max_duration",
+        "min_duration","sum_duration","average_duration","std_duration","mqtt","coap","http","https","dns",
+        "telnet","smtp","ssh","irc","tcp","udp","dhcp","arp","icmp","igmp","ipv","llc","tot_sum","min","max", 
+        "avg","std","tot_size","iat","number_pkts","mac","magnitude","radius","covariance","variance","weight",
+        "wifi_type","wifi_subtype","ds_status","fragments","wifi_src","wifi_dst","sequence_number",
+        "protocol_version","flow_idle_time","flow_active_time"
     ]
     
     
@@ -35,26 +33,15 @@ class Feature_extraction():
         global ethsize, src_ports, dst_ports, src_ips, dst_ips, ips , tcpflows, udpflows, src_packet_count, dst_packet_count, src_ip_byte, dst_ip_byte
         global protcols_count, tcp_flow_flgs, incoming_packets_src, incoming_packets_dst, packets_per_protocol, average_per_proto_src
         global average_per_proto_dst, average_per_proto_src_port, average_per_proto_dst_port
-        columns = ["ts","flow_duration","Header_Length",
-                 
-                  "Protocol Type","Protocol_name",
-                  "Duration",
-                 
-                  "Rate", "Srate", "Drate"
-                   ,"fin_flag_number","syn_flag_number","rst_flag_number"
-                   ,"psh_flag_number","ack_flag_number","urg_flag_number","ece_flag_number","cwr_flag_number",
-                   "ack_count", "syn_count", "fin_count", "urg_count", "rst_count", 
-                 
-                   "max_duration","min_duration","sum_duration","average_duration","std_duration",
-                 
-                   "CoAP", "HTTP", "HTTPS", "DNS", "Telnet","SMTP", "SSH", "IRC", "TCP", "UDP", "DHCP","ARP", "ICMP", "IGMP", "IPv", "LLC",
-        "Tot sum", "Min", "Max", "AVG", "Std","Tot size", "IAT", "Number", "MAC", "Magnitue", "Radius", "Covariance", "Variance", "Weight",
-                 
-                   "DS status", "Fragments", 
-                 
-                   "Sequence number", "Protocol Version",
-                   "flow_idle_time", "flow_active_time"
-
+        columns = [
+            "ts","flow_duration","header_length","protocol_type","protocol_name","duration","rate","srate","drate",
+            "fin_flag_number","syn_flag_number","rst_flag_number","psh_flag_number","ack_flag_number",
+            "urg_flag_number","ece_flag_number","cwr_flag_number","ack_count","syn_count","fin_count","urg_count",
+            "rst_count","max_duration","min_duration","sum_duration","average_duration","std_duration","coap","http",
+            "https","dns","telnet","smtp","ssh","irc","tcp","udp","dhcp","arp","icmp","igmp","ipv","llc",
+            "tot_sum","min","max","avg","std","tot_size","iat","number_pkts","mac","magnitude","radius","covariance",
+            "variance","weight","ds_status","fragments","sequence_number","protocol_version","flow_idle_time",
+            "flow_active_time"
         ]
         base_row = {c:[] for c in columns}
         start = time.time()
@@ -198,9 +185,9 @@ class Feature_extraction():
                     tcp = l_three.tcp()
 
                     protocol_name = get_protocol_name(proto_type)
-                    if protocol_name == "ICMP":
+                    if protocol_name.upper() == "ICMP":
                         icmp = 1
-                    elif protocol_name == "IGMP":
+                    elif protocol_name.upper() == "IGMP":
                         igmp = 1
                     # L1_features
                     l_one = L1(potential_packet)
@@ -380,73 +367,75 @@ class Feature_extraction():
                         flag_valus.append(0)
 
                 
-                new_row = {"ts": ts, 
-                           "Protocol_name": protocol_name, 
-                           "Duration": duration, 
-                           'Protocol Type': proto_type, 
-                           "flow_duration": flow_duration, 
-                          "Header_Length": flow_byte, 
-                          "src_ip_bytes": src_byte_count, 
-                          "fin_flag_number": flag_valus[0],
-                          "syn_flag_number":flag_valus[1],
-                          "rst_flag_number":flag_valus[2],
-                          "psh_flag_number": flag_valus[3],
-                          "ack_flag_number": flag_valus[4],
-                          "urg_flag_number": flag_valus[5],
-                          "ece_flag_number":flag_valus[6],
-                          "cwr_flag_number":flag_valus[7],
-                           "dst_ip_bytes": dst_byte_count, 
-                           "Rate": rate, 
-                           "Srate": srate, 
-                           "Drate": drate, 
-                           "ack_count":ack_count, 
-                           "syn_count":syn_count, 
-                           "fin_count": fin_count, 
-                           "urg_count": urg_count, 
-                           "rst_count": rst_count,
-                           "max_duration": max_duration,
-                           "min_duration": min_duration,
-                           "sum_duration": sum_duration,
-                           "average_duration": average_duration,
-                           "std_duration": std_duration,
-                           "CoAP": coap, 
-                           "HTTP": http, 
-                           "HTTPS": https, 
-                           "DNS": dns, 
-                           "Telnet":telnet,
-                           "SMTP": smtp, 
-                           "SSH": ssh, 
-                           "IRC": irc, 
-                           "TCP": tcp, 
-                           "UDP": udp, 
-                           "DHCP": dhcp,
-                           "ARP": arp, 
-                           "ICMP": icmp, 
-                           "IGMP": igmp, 
-                           "IPv": ipv, 
-                           "LLC": llc,
-                           "Tot sum":sum_packets, 
-                           "Min": min_packets, 
-                           "Max": max_packets, 
-                           "AVG": mean_packets, 
-                           "Std": std_packets,
-                           "Tot size": ethernet_frame_size, 
-                           "IAT": IAT, 
-                           "Number": len(ethsize), 
-                           "MAC": mac,
-                           "Magnitue": magnite, 
-                           "Radius":radius, 
-                           "Covariance":covaraince, 
-                           "Variance":var_ratio, 
-                           "Weight": weight,
-                           "Correlation": correlation, 
-                           "RARP": rarp, 
-                           "DS status":ds_status,
-                           "Fragments":fragments,
-                           "Sequence number":sequence,
-                           "Protocol Version": pack_id,
-                           "flow_idle_time":idle_time,
-                           "flow_active_time":active_time}
+                new_row = {
+                    "ts": ts, 
+                    "protocol_name": protocol_name, 
+                    "duration": duration, 
+                    'protocol_type': proto_type, 
+                    "flow_duration": flow_duration, 
+                    "header_length": flow_byte, 
+                    "src_ip_bytes": src_byte_count, 
+                    "fin_flag_number": flag_valus[0],
+                    "syn_flag_number":flag_valus[1],
+                    "rst_flag_number":flag_valus[2],
+                    "psh_flag_number": flag_valus[3],
+                    "ack_flag_number": flag_valus[4],
+                    "urg_flag_number": flag_valus[5],
+                    "ece_flag_number":flag_valus[6],
+                    "cwr_flag_number":flag_valus[7],
+                    "dst_ip_bytes": dst_byte_count, 
+                    "rate": rate, 
+                    "srate": srate, 
+                    "drate": drate, 
+                    "ack_count":ack_count, 
+                    "syn_count":syn_count, 
+                    "fin_count": fin_count, 
+                    "urg_count": urg_count, 
+                    "rst_count": rst_count,
+                    "max_duration": max_duration,
+                    "min_duration": min_duration,
+                    "sum_duration": sum_duration,
+                    "average_duration": average_duration,
+                    "std_duration": std_duration,
+                    "coap": coap, 
+                    "http": http, 
+                    "https": https, 
+                    "dns": dns, 
+                    "telnet":telnet,
+                    "smtp": smtp, 
+                    "ssh": ssh, 
+                    "irc": irc, 
+                    "tcp": tcp, 
+                    "udp": udp, 
+                    "dhcp": dhcp,
+                    "arp": arp, 
+                    "icmp": icmp, 
+                    "igmp": igmp, 
+                    "ipv": ipv, 
+                    "llc": llc,
+                    "tot_sum":sum_packets, 
+                    "min": min_packets, 
+                    "max": max_packets, 
+                    "avg": mean_packets, 
+                    "std": std_packets,
+                    "tot_size": ethernet_frame_size, 
+                    "iat": IAT, 
+                    "number_pkts": len(ethsize), 
+                    "mac": mac,
+                    "magnitude": magnite, 
+                    "radius":radius, 
+                    "covariance":covaraince, 
+                    "variance":var_ratio, 
+                    "weight": weight,
+                    "correlation": correlation, 
+                    "rarp": rarp, 
+                    "ds_status":ds_status,
+                    "fragments":fragments,
+                    "sequence_number":sequence,
+                    "protocol_version": pack_id,
+                    "flow_idle_time":idle_time,
+                    "flow_active_time":active_time
+                }
                 for c in base_row.keys():
                     base_row[c].append(new_row[c])
                     

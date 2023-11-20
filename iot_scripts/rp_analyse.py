@@ -5,7 +5,7 @@ import pandas as pd
 cols = ["duration", "srate", "drate", "syn_flag_number", "psh_flag_number", 
         "ack_flag_number", "ack_count", "syn_count", "rst_count", "header_length", 
         "https", "ssh", "flow_duration", "avg", "max", "tot_sum", "min", "iat", 
-        "magnitue", "radius", "variance"]
+        "magnitude", "radius", "variance"]
 
 
 mean = np.array([1.14469135e+02, 1.94699208e+03, 0.00000000e+00, 0.00000000e+00,

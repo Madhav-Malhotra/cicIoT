@@ -17,19 +17,25 @@ def add_pcap_data(filepath : str) -> None:
         database = os.getenv("DB_NAME")
     )
 
+    cursor = db.cursor()
+
     # Read file data
     with open(filepath, 'r') as f:
         lines = f.readlines()
-
-    # Add each row to database
-    cursor = db.cursor()
-    for l in lines[1:]:
-        try:
-            cursor.execute(f"INSERT INTO pcap ({lines[0].strip()}) VALUES ({l.strip()})")
-        except Exception as e:
-            print(e)
+   
+    columns = lines[0].strip()
+    num_cols = len(columns.split(','))
+    values = [ tuple(l.strip().split(',')) for l in lines[1:] ] 
+    
+    # Add rows to database
+    insert_query = f"INSERT INTO pcap ({columns}) VALUES ({ '%s, ' * (num_cols - 1) + '%s' })"
+    try:
+        cursor.executemany(insert_query, values)
+        db.commit()
+        print(f"Successfully stored data from {filepath} in SQL server")
+    except Exception as e:
+        print("ERROR:", e)
 
     # Close connection
     cursor.close()
     db.close()
-    print(f"Successfully stored data from {filepath} in SQL server")

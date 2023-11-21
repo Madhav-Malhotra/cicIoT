@@ -1,8 +1,10 @@
 import os
 import time
 import RPi.GPIO as GPIO
-from feat_extract.Feature_extraction import Feature_extraction
+from rp_db import add_pcap_data
 from rp_analyse import check_benign
+from feat_extract.Feature_extraction import Feature_extraction
+
 
 # Setup output pins
 BEN_PIN = 22
@@ -21,9 +23,10 @@ def analyze_pcap_file(file_path):
     Converts pcap to CSV and runs negative selection algorithm
     '''
     
-    # Create CSV
+    # Create CSV and store to database
     print(f"Analyzing {file_path}")
     fe.pcap_evaluation(file_path, file_path[:-5])
+    add_pcap_data(file_path[:-5] + ".csv")
 
     # Run negative selection, show results
     benign = check_benign(file_path[:-5] + ".csv")

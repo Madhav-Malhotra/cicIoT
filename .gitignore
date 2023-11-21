@@ -1,3 +1,4 @@
 /iot_scripts/network_traffic/*
 /iot_scripts/feat_extract/__pycache__/*
 /iot_scripts/__pycache__/*
+/iot_scripts/.env

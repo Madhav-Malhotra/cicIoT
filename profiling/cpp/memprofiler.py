@@ -6,7 +6,7 @@ Send kill signal (Ctrl+C) to stop profiling.
 
 # Library Imports
 import time
-import psutil
+from psutil import Process
 import argparse
 
 
@@ -22,11 +22,11 @@ def profiler(outfile : str, pid : int, interval : int) -> None:
     """
 
     # Setup process
-    process = psutil.Process(pid)
+    process = Process(pid)
     ram_info = process.memory_full_info()
     disk_info = process.io_counters()
 
-    # Setup CSV
+    # Setup CSV header
     f = open(outfile, 'w')
     f.write(",".join(ram_info._fields + disk_info._fields) + "\n")
 
@@ -40,24 +40,6 @@ def profiler(outfile : str, pid : int, interval : int) -> None:
         ) + "\n")
 
         time.sleep(interval)
-
-def main(outfile : str, pid : int, interval : int):
-    """
-    Fixes PID if none specified, then starts profiling.
-
-    Parameters
-    ------------------
-    outfile (output CSV filepath)
-    pid (process ID of process to profile)
-    interval (time between stat recordings in seconds)
-    """
-
-    # Get the PID of the main script
-    if pid == None:
-        with open("pid.txt", 'r') as f:
-            pid = int(f.readline())
-
-    profiler(outfile, pid, interval)
 
 if __name__ == "__main__":
     # Setup script arguments
@@ -91,4 +73,8 @@ if __name__ == "__main__":
 
     # Run profiler
     args = parser.parse_args()
-    main(args.output, args.pid, args.interval)
+
+    if args.pid == None:
+        print("Error: specify process ID with -p flag")
+    else: 
+        profiler(args.output, args.pid, args.interval)
